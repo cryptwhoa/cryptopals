@@ -3,6 +3,20 @@ import time
 
 import mt19937
 
+def reverse_xor_leftshift_mask(y, shift, nbits, mask):
+        '''
+        solves an equation of the form "y = ((x << c) & mask) ^ x
+
+        args:
+                y:      y in the above equation
+                shift:  c in the above equation
+                nbits:  number of bits in x and y in the above equation
+                mask:   mask in above equation
+
+        returns:
+                x such that ((x << c) & mask) ^ x = y
+        '''
+
 def reverse_xor_rightshift(y, shift, nbits):
         '''
         solves an equation of the form "y = (x >> c) ^ x"
@@ -10,27 +24,30 @@ def reverse_xor_rightshift(y, shift, nbits):
         args:
                 y:      y in the above equation
                 shift:  c in the above equation
-                bits:   number of bits in x and y in the above equation
+                nbits:   number of bits in x and y in the above equation
 
         returns:
-                x such that (x << c) ^ x = y
+                x such that (x >> c) ^ x = y
         '''
 
-        chunk_len = shift
-        chunk_mask = (1 << chunk_len) - 1
         x = 0
-        nbits_recovered = 0
-        while nbits_recovered + chunk_len <= nbits:
-                chunk = (y >> (nbits - nbits_recovered - chunk_len)) & chunk_mask
-                x = (x << chunk_len) | ((x & chunk_mask) ^ chunk)
-                nbits_recovered = nbits_recovered + chunk_len
-
-        nbits_remaining = (nbits - nbits_recovered)
-        last_mask = (1 << (nbits_remaining)) - 1
-        last_chunk = y & last_mask
-        x = (x << nbits_remaining) | (((x >> (chunk_len - nbits_remaining)) & last_mask) ^ last_chunk)
+        for b in range(nbits):
+                if b - shift < 0:
+                        x = x | (y & _BIT(b, nbits))
+                else:
+                        x = x | ((y & _BIT(b, nbits)) ^ ((x >> shift) & _BIT(b, nbits)))
 
         return x
+
+def _BIT(x, nbits):
+        '''
+        helper function, used for calculating masks
+
+        generates a value b0b1b2...b_nbits such that b_i = 0 for all i
+        except i=x
+        '''
+
+        return 1 << (nbits - x - 1)
 
 
 def generate_target():
