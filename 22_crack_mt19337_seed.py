@@ -5,7 +5,7 @@ import mt19937
 
 def reverse_xor_rightshift(y, shift, nbits):
         '''
-        solves an equation of the form "y = (x << c) ^ x"
+        solves an equation of the form "y = (x >> c) ^ x"
 
         args:
                 y:      y in the above equation
